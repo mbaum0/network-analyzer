@@ -1,0 +1,8 @@
+[package]
+name = "dns-feed"
+version = "0.1.0"
+authors = ["Michael Baumgarten <mb2732@rit.edu>"]
+edition = "2018"
+
+[dependencies]
+pcap = { version = "0.7", features = ["tokio"] }
