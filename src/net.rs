@@ -78,7 +78,7 @@ pub mod types {
       0x8100 => String::from("vlan"),
       0x86dd => String::from("ipv6"),
       0x8847 => String::from("mpls"),
-           _ => String::from("")
+           _ => format!("{:02x}", self.value)
       } 
     }
   }
@@ -97,6 +97,7 @@ pub mod types {
     pub fn as_string(&self) -> String {
       match self.value {
         0x01 => String::from("icmp"),
+        0x02 => String::from("igmp"),
         0x06 => String::from("tcp"),
         0x11 => String::from("udp"),
            _ => format!("{:02x}", self.value)
