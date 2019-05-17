@@ -1,23 +1,10 @@
 extern crate pcap;
 
+mod net;
+use net::{frames};
+
 //use pcap::{Device, Capture};
 use pcap::Capture;
-
-struct EthernetFrame<'p> {
-  dst_mac: [u8; 6],
-  src_mac: [u8; 6],
-  eth_type: u16,
-  payload: &'p [u8],
-}
-
-fn build_ethernet_frame(packet: &[u8]) -> EthernetFrame {
-  EthernetFrame {
-    dst_mac:  [packet[0], packet[1], packet[2], packet[3], packet[4], packet[5]],
-    src_mac:  [packet[6], packet[7], packet[8], packet[9], packet[10], packet[11]],
-    eth_type: u16::from_be_bytes([packet[12], packet[13]]),
-    payload:  &packet[14..]
-  }
-}
 
 struct ArpFrame<'mac, 'proto> {
   hardware_type: u16,
@@ -28,7 +15,7 @@ struct ArpFrame<'mac, 'proto> {
   src_mac: &'mac [u8],
   src_protocol_address: &'proto [u8],
   target_mac_address: &'mac [u8],
-  target_protocol_address: &'proto [u8]  
+  target_protocol_address: &'proto [u8]
 }
 
 fn build_arp_frame(packet: &[u8]) -> ArpFrame {
@@ -110,23 +97,20 @@ fn capture_packets(dev_name : &str) {
 
   while let Ok(packet) = cap.next() {
     let data = packet.data;
-    let eth_frame = build_ethernet_frame(data);
+    let eth_frame = frames::EthernetFrame::new(data);
 
-    let eth_type_name = get_ether_type_name(eth_frame.eth_type);
-    let src_mac_str = get_mac_str(eth_frame.src_mac);
-    let dst_mac_str = get_mac_str(eth_frame.dst_mac);
     
-    println!("[{:?}] {:x?} -> {:x?}", eth_type_name, src_mac_str, dst_mac_str);
+    println!("{}", eth_frame.as_string());
 
-    if eth_type_name == "arp" {
-      let arp_frame = build_arp_frame(eth_frame.payload);
+    // if eth_type_name == "arp" {
+    //   let arp_frame = build_arp_frame(eth_frame.payload);
 
-      let arp_src_mac = arp_frame.src_mac;
-      let arp_src_protocol_address = arp_frame.src_protocol_address;
-      let arp_op_code = arp_frame.op_code;
+    //   let arp_src_mac = arp_frame.src_mac;
+    //   let arp_src_protocol_address = arp_frame.src_protocol_address;
+    //   let arp_op_code = arp_frame.op_code;
 
-      println!("\t[arp: {:?}] src mac: {:x?} src proto: {:?}", arp_op_code, arp_src_mac, arp_src_protocol_address);
-    }
+    //   println!("\t[arp: {:?}] src mac: {:x?} src proto: {:?}", arp_op_code, arp_src_mac, arp_src_protocol_address);
+    // }
   }
 }
 
