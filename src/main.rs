@@ -35,9 +35,12 @@ fn capture_packets(dev_name : &str) {
   while let Ok(packet) = cap.next() {
     let data = packet.data;
     let eth_frame = frames::EthernetFrame::new(data);
-
-    
     println!("{}", eth_frame.as_string());
+
+    if eth_frame.eth_type().as_string() == "ipv4" {
+      let ipv4_frame = frames::IPv4Frame::new(eth_frame.payload());
+      println!("{}", ipv4_frame.as_string());
+    }
   }
 }
 
