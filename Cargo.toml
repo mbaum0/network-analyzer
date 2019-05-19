@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 pcap = { version = "0.7", features = ["tokio"] }
+netproto = "0.1.0"

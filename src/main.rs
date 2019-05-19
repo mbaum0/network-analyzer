@@ -1,7 +1,6 @@
 extern crate pcap;
 
-mod net;
-use net::{frames};
+use netproto::{frames};
 
 //use pcap::{Device, Capture};
 use pcap::Capture;
