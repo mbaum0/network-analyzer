@@ -1,3 +1,6 @@
+//! # Networking
+//!
+//! A library for modeling networking protocols
 pub mod types {
 
   pub struct MacAddress {
@@ -5,10 +8,12 @@ pub mod types {
   }
 
   impl MacAddress {
+    /// Produces a new MacAddress
     pub fn new(address: [u8; 6]) -> MacAddress {
       MacAddress { address }
     }
 
+    /// Returns the string representation of a MacAddress
     pub fn as_string(&self) -> String {
       format!(
         "{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}",
@@ -21,10 +26,12 @@ pub mod types {
       )
     }
 
+    /// Returns a MacAddress's value as a &[u8]
     pub fn as_bytes(&self) -> &[u8] {
       &self.address
     }
 
+    /// Returns a MacAddress's value as a u64 
     pub fn as_u64(&self) -> u64 {
       u64::from_be_bytes([
         0,
@@ -44,10 +51,12 @@ pub mod types {
   }
 
   impl IPv4Address {
+    /// Produces a new IPv4Address
     pub fn new(address: [u8; 4]) -> IPv4Address {
       IPv4Address { address }
     }
 
+    /// Returns the string representation of an IPv4Address
     pub fn as_string(&self) -> String {
       format!(
         "{}.{}.{}.{}",
@@ -55,10 +64,12 @@ pub mod types {
       )
     }
 
+    /// Returns an IPv4Address's value as a &[u8]
     pub fn as_bytes(&self) -> &[u8] {
       &self.address
     }
 
+    /// Return's an IPv4Address's value as a u32
     pub fn as_u32(&self) -> u32 {
       u32::from_be_bytes([
         self.address[0],
@@ -74,10 +85,12 @@ pub mod types {
   }
 
   impl IPv6Address {
+    /// Produces a new IPv6Address
     pub fn new(address: [u8; 16]) -> IPv6Address {
       IPv6Address { address }
     }
 
+    /// Returns the string representation of an IPv6Address
     pub fn as_string(&self) -> String {
       format!(
         "{:x}:{:x}:{:x}:{:x}:{:x}:{:x}:{:x}:{:x}",
@@ -92,10 +105,12 @@ pub mod types {
       )
     }
 
+    /// Returns an IPv6Address's value as a &[u8]
     pub fn as_bytes(&self) -> &[u8] {
       &self.address
     }
 
+    /// Returns an IPv6Address's value as a u128
     pub fn as_u128(&self) -> u128 {
       u128::from_be_bytes([
         self.address[0],
@@ -118,17 +133,20 @@ pub mod types {
     }
   }
 
+  /// Represents types that may populate the EtherType field in an Ethernet header
   pub struct EtherType {
     value: u16,
   }
 
   impl EtherType {
+    /// Produces a new EtherType
     pub fn new(bytes: [u8; 2]) -> EtherType {
       EtherType {
         value: u16::from_be_bytes([bytes[0], bytes[1]]),
       }
     }
 
+    /// Returns the string representation of an EtherType
     pub fn as_string(&self) -> String {
       // if value field is greater than 0x05DC (1500) this
       // is an Ethernet Version 2 frame. If less than 0x05DC,
@@ -150,17 +168,21 @@ pub mod types {
     }
   }
 
+  /// Represents a protocol type that may be listed in the protocol/next_header field of 
+  /// an IPv4/IPv6 header
   pub struct IPProtocolType {
     value: u8,
   }
 
   impl IPProtocolType {
+    /// Procues a new IPProtocolType
     pub fn new(bytes: [u8; 1]) -> IPProtocolType {
       IPProtocolType {
         value: u8::from_be_bytes([bytes[0]]),
       }
     }
 
+    /// Returns the string representation of an IPProtocolType
     pub fn as_string(&self) -> String {
       match self.value {
         0x00 => String::from("HOPOPT"),
@@ -186,6 +208,7 @@ pub mod frames {
   }
 
   impl<'p> EthernetFrame<'p> {
+    /// Produces a new EthernetFrame
     pub fn new(bytes: &[u8]) -> EthernetFrame {
       EthernetFrame {
         dst_mac: MacAddress::new([bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5]]),
@@ -195,6 +218,7 @@ pub mod frames {
       }
     }
 
+    /// Returns the string representation of an EthernetFrame
     pub fn as_string(&self) -> String {
       format!(
         "ETHERNET: [{}] [{} -> {}]",
@@ -204,10 +228,12 @@ pub mod frames {
       )
     }
 
+    /// Returns the EtherType contained in an EthernetFrame
     pub fn eth_type(&self) -> &EtherType {
       &self.eth_type
     }
 
+    /// Returns the payload contained in an EthernetFrame
     pub fn payload(&self) -> &[u8] {
       self.payload
     }
@@ -232,6 +258,7 @@ pub mod frames {
   }
 
   impl<'o, 'p> IPv4Frame<'o, 'p> {
+    /// Produces a new IPv4Frame
     pub fn new(bytes: &[u8]) -> IPv4Frame {
       let options_index = (usize::from_be_bytes([0, 0, 0, 0, 0, 0, 0, bytes[0] & 0x0F]) - 5) * 4;
 
@@ -254,6 +281,7 @@ pub mod frames {
       }
     }
 
+    /// Returns the string representation of an IPv4Frame
     pub fn as_string(&self) -> String {
       format!(
         "IPv4: [{}] [{} -> {}]",
@@ -261,6 +289,16 @@ pub mod frames {
         self.src_address.as_string(),
         self.dst_address.as_string()
       )
+    }
+
+    /// Returns the IPProtocolType contained in an IPv4Frame
+    pub fn protocol(&self) -> &IPProtocolType {
+      &self.protocol
+    }
+
+    /// Returns the payload contained in an IPv4Frame
+    pub fn payload(&self) -> &[u8] {
+      self.payload
     }
   }
 
@@ -277,6 +315,7 @@ pub mod frames {
   }
 
   impl<'p> IPv6Frame<'p> {
+    /// Produces a new IPv6Frame
     pub fn new(bytes: &[u8]) -> IPv6Frame {
       IPv6Frame {
         version: u8::from_be_bytes([bytes[0] & 0xF0]),
@@ -297,6 +336,7 @@ pub mod frames {
       }
     }
 
+    /// Returns the string representation of an IPv6Frame
     pub fn as_string(&self) -> String {
       format!(
         "IPv6: [{}] [{} -> {}]",
@@ -304,6 +344,16 @@ pub mod frames {
         self.src_address.as_string(),
         self.dst_address.as_string()
       )
+    }
+
+    /// Returns the IPProtocolType contained in an IPv6Frame
+    pub fn next_header(&self) -> &IPProtocolType {
+      &self.next_header
+    }
+
+    /// Returns the payload contained in an IPv6Frame
+    pub fn payload(&self) -> &[u8] {
+      self.payload
     }
   }
 }
