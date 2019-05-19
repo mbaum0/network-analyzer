@@ -37,9 +37,13 @@ fn capture_packets(dev_name : &str) {
     let eth_frame = frames::EthernetFrame::new(data);
     println!("\n{}", eth_frame.as_string());
 
-    if eth_frame.eth_type().as_string() == "ipv4" {
+    if eth_frame.eth_type().as_string() == "IPv4" {
       let ipv4_frame = frames::IPv4Frame::new(eth_frame.payload());
       println!("    {}", ipv4_frame.as_string());
+    }
+    else if eth_frame.eth_type().as_string() == "IPv6" {
+      let ipv6_frame = frames::IPv6Frame::new(eth_frame.payload());
+      println!("    {}", ipv6_frame.as_string());
     }
   }
 }
